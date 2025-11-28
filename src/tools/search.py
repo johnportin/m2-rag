@@ -1,12 +1,14 @@
 from pydantic import BaseModel
-from minsearch import Index
-from src.db.index import create_index
 
-index: Index = create_index("data/m2_docs.jsonl")
+from src.db.emb_index import create_index, EmbeddedDocIndex
+
+index: EmbeddedDocIndex = create_index()
+
 
 class SearchDocsArgs(BaseModel):
     query: str
     k: int = 5
 
+
 def search_docs(args: SearchDocsArgs) -> list[dict]:
-    return index.search(args.query, num_results=args.k)
+    return index.search(args.query, k=args.k)

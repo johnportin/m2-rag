@@ -2,10 +2,12 @@ import os
 from dataclasses import dataclass
 from typing import Iterator
 
+
 @dataclass
 class M2File:
     path: str
     content: str
+
 
 def read_m2_files(root_dir: str, extensions=(".m2",)) -> Iterator[M2File]:
     """
