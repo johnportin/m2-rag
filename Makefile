@@ -24,3 +24,6 @@ query-ms:
 
 rag-query:
 	$(PY) -m src.cli.rag_query --query "$(Q)"
+
+judge:
+	$(PY) scripts/run_judged_prompts.py --input input/judged_prompts.json

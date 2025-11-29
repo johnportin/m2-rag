@@ -3,14 +3,25 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-from typing import Iterable, List, Dict
+from typing import Iterable, List, Dict, TYPE_CHECKING
 
-import faiss
 import numpy as np
-from sentence_transformers import SentenceTransformer
+
+try:
+    from sentence_transformers import SentenceTransformer
+except ModuleNotFoundError:  # pragma: no cover - optional dep
+    SentenceTransformer = None  # type: ignore[assignment]
+
+try:  # faiss is optional; fall back to the lightweight index if missing.
+    import faiss  # type: ignore
+except ModuleNotFoundError:  # pragma: no cover - only hit in constrained envs
+    faiss = None  # type: ignore[assignment]
 
 DEFAULT_MODEL = os.getenv("M2_EMB_MODEL", "all-MiniLM-L6-v2")
 DATA_PATH = Path(__file__).resolve().parent.parent.parent / "data" / "m2_docs.jsonl"
+
+if TYPE_CHECKING:  # only used for type hints to avoid runtime dependency
+    from src.db.ms_index import MinsearchDocIndex
 
 
 def _normalize_doc(doc: Dict) -> Dict:
@@ -58,6 +69,9 @@ class EmbeddedDocIndex:
     def __init__(self, data_path: Path = DATA_PATH, model_name: str = DEFAULT_MODEL):
         self.data_path = Path(data_path)
         self.model_name = model_name
+        if SentenceTransformer is None:  # pragma: no cover - create_index guards
+            raise RuntimeError("sentence-transformers is unavailable; cannot build embeddings.")
+
         self.model = SentenceTransformer(model_name)
 
         self.docs = load_docs(self.data_path)
@@ -71,6 +85,9 @@ class EmbeddedDocIndex:
             convert_to_numpy=True,
             normalize_embeddings=True,
         ).astype("float32")
+
+        if faiss is None:  # pragma: no cover - create_index protects against this
+            raise RuntimeError("faiss is unavailable; cannot build embedding index.")
 
         self.index = faiss.IndexFlatIP(embeddings.shape[1])
         self.index.add(embeddings)
@@ -98,5 +115,14 @@ class EmbeddedDocIndex:
         return results
 
 
-def create_index(data_path: Path = DATA_PATH, model_name: str = DEFAULT_MODEL) -> EmbeddedDocIndex:
+def create_index(
+    data_path: Path = DATA_PATH,
+    model_name: str = DEFAULT_MODEL,
+) -> EmbeddedDocIndex | MinsearchDocIndex:
+    if faiss is None or SentenceTransformer is None:
+        # Avoid importing unless necessary to keep faiss-only deps optional.
+        from src.db.ms_index import create_index as create_ms_index, MinsearchDocIndex
+
+        return create_ms_index(data_path)  # type: ignore[return-value]
+
     return EmbeddedDocIndex(data_path=data_path, model_name=model_name)

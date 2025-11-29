@@ -43,3 +43,26 @@ The data comes in raw `.m2` files, a format which is not often worked with outis
     ```bash
     python src/scripts/run_parser.py
     ```
+
+## Running judged prompt sweeps
+
+Set `OPENAI_API_KEY`, then run prompts through the RAG + judge agents:
+
+    ```bash
+    python scripts/run_judged_prompts.py --prompt "What is a monomial ideal?"
+    ```
+
+You can also pass `--input prompts.json` where the file contains `["prompt1", "prompt2"]`.
+Results are saved to `output/judged_prompts_<timestamp>.jsonl` by default, and each entry
+records the agent answer, references, tool events, and the judge verdict.
+
+## Streaming responses
+
+Run the interactive CLI to stream answers directly from the agent:
+
+    ```bash
+    python -m src.main "How do I define a monomial ideal?"
+    ```
+
+The CLI prints incremental answer text as it arrives, then lists the cited references
+and the tool-calling trace once the run completes.

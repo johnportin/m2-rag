@@ -1,0 +1,15 @@
+{
+  "prompts": [
+    "Show three ways to get all monomials in the variables x, y, and z in degree 4.",
+    "What is a Veronese Subring. Can you define one in M2?",
+    "Compute the frobenius powers of the ideal (xy^2, x^3 + y^3) in k[x,y]",
+    "Can you define a monomial ideal that has krull dimension 4?",
+    "Provide an example of a Cohen-Macaulay (CM) ideal in k[x, y], and show that it satisfies the CM property.",
+    "What is the regularity of the ideal (x^3 + y^3) in k[x, y]? How about in k[x, y, z]?",
+    "Write code to determine whether the ideal (x^3, y^3, xy^2) in k[x, y] has linear presnetation.",
+    "Write code to compute the krull dimension of an arbitrary ring in k[x, y, z]",
+    "What are function closures in M2?",
+    "Can I define my own class of objects?",
+    "How do I define a random ideal? Is there a package for this? Can I do statistics on random monomial ideals?"
+  ]
+}

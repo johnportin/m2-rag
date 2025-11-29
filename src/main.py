@@ -1,11 +1,19 @@
-from src.agents.rag_agent import rag_agent
-import json
+from __future__ import annotations
 
-def print_tool_calls(result):
-    # get messages whether all_messages is a method or attribute
+import argparse
+import sys
+from typing import List
+
+from pydantic_ai import messages as ai_messages
+
+from src.agents.rag_agent import rag_agent
+
+
+def print_tool_calls(result) -> None:
+    """Pretty-print tool call activity recorded during the run."""
     msgs = result.all_messages() if callable(getattr(result, "all_messages", None)) else result.all_messages
 
-    print("\n--- Tool Requests (assistant → tool) ---")
+    print("\n--- Tool Requests (assistant -> tool) ---")
     any_req = False
     for m in msgs:
         role = getattr(m, "role", None)
@@ -15,7 +23,6 @@ def print_tool_calls(result):
             args = getattr(m, "args", None) or getattr(m, "tool_args", None)
             print(f"- {tool_name}")
             if args is not None:
-                # keep it short/readable
                 try:
                     print(f"  args: {args.model_dump()}")
                 except Exception:
@@ -23,7 +30,7 @@ def print_tool_calls(result):
     if not any_req:
         print("(none)")
 
-    print("\n--- Tool Responses (tool → assistant) ---")
+    print("\n--- Tool Responses (tool -> assistant) ---")
     any_resp = False
     for m in msgs:
         if getattr(m, "role", None) == "tool":
@@ -37,14 +44,54 @@ def print_tool_calls(result):
         print("(none)")
 
 
-if __name__=="__main__":
-    print("Entered chatbot...")
+def stream_answer(query: str):
+    """Stream the agent's structured response for the provided query."""
+    streamed_chunks: List[str] = []
 
-    query = "how do you define a monomial ideal in macaulay 2?"
+    async def event_stream_handler(_, events):
+        async for event in events:
+            if isinstance(event, ai_messages.PartDeltaEvent):
+                delta = event.delta
+                content = getattr(delta, "content_delta", None)
+                if content:
+                    print(content, end="", flush=True)
+                    streamed_chunks.append(content)
+            elif isinstance(event, ai_messages.PartEndEvent):
+                if getattr(event.part, "part_kind", None) == "text":
+                    print("", end="", flush=True)
 
-    result = rag_agent.run_sync(query)
-    print(result.response.text)
-    # for msg in result.all_messages():
+    print("\nAssistant:\n")
+    result = rag_agent.run_sync(query, event_stream_handler=event_stream_handler)
+    final_output = result.output
+
+    if not streamed_chunks and final_output.answer:
+        print(final_output.answer)
+
+    if final_output.references:
+        print("\n\nReferences:")
+        for ref in final_output.references:
+            print(f"- {ref}")
+
+    return result
 
 
-    print_tool_calls(result)
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Stream responses from the Macaulay2 RAG agent.")
+    parser.add_argument(
+        "query",
+        nargs="?",
+        default="how do you define a monomial ideal in macaulay 2?",
+        help="Prompt to send to the agent.",
+    )
+    args = parser.parse_args()
+
+    print(f"Query: {args.query}")
+    stream_result = stream_answer(args.query)
+    print_tool_calls(stream_result)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        sys.exit(1)
