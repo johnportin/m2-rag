@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import os
-import re
 
 
 def parse_args() -> argparse.Namespace:
@@ -13,13 +12,13 @@ def parse_args() -> argparse.Namespace:
         required=False,
         help="Query to ask the agent (default is a sample question).",
     )
+    parser.add_argument(
+        "--index-mode",
+        choices=["docs", "chunks"],
+        default="chunks",
+        help="Index mode to use (default: chunks).",
+    )
     return parser.parse_args()
-
-
-def simple_tokenize(text: str) -> str:
-    """Lowercase, strip punctuation, collapse whitespace."""
-    tokens = re.findall(r"[A-Za-z0-9]+", text.lower())
-    return " ".join(tokens)
 
 
 def main() -> None:
@@ -36,13 +35,19 @@ def main() -> None:
 
     args = parse_args()
     query = args.query or "how do you define a monomial ideal in macaulay 2?"
-    processed_query = simple_tokenize(query)
+
+    # Set index mode for this run
+    os.environ["M2_INDEX_MODE"] = args.index_mode
 
     # Import after environment is loaded so API keys are available.
     from src.agents.rag_agent import rag_agent
 
-    result = rag_agent.run_sync(processed_query)
-    print(result.response.text)
+    result = rag_agent.run_sync(query)
+    print(result.output.answer)
+    if result.output.references:
+        print("\nReferences:")
+        for ref in result.output.references:
+            print(f"- {ref}")
 
     rag_messages = result.all_messages() if callable(getattr(result, "all_messages", None)) else result.all_messages
     print("\n--- Used sources ---")

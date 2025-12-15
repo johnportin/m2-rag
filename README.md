@@ -71,10 +71,30 @@ uv run python -m src.cli.query_ms_index "hilbert polynomial" -k 5 --show-scores 
 uv run python -m src.cli.query_chunk_index "hilbert polynomial" -k 5 --show-scores  # Chunked text
 ```
 
+## Using the Agent
+
+Set `OPENAI_API_KEY`, then run prompts using the commands in the `Makefile`. 
+
+### Querying
+
+You can  run a one-off query using the Makefile target (defaults to `--index-mode chunks` and uses the `QUERY` variable):
+
+```bash
+make rag-query QUERY="What is a hilbert polynomial?"
+```
+
+This wraps `uv run python -m src.main ...` for convenience.
+
 ## Running judged prompt sweeps
 
-Set `OPENAI_API_KEY`, then run prompts through the RAG + judge agents:
+Simply run
 
+```bash
+make judge
+```
+to run the judge against all prompts in `input/judged_prompts.json`. 
+
+Alternatively, for more control, you are able to use the following cli:
 ```bash
 uv run python scripts/run_judged_prompts.py --prompt "What is a monomial ideal?" --index-mode chunks
 ```
