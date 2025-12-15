@@ -1,10 +1,7 @@
 # m2-rag
 A retrieval-augmented agent for the Macaulay2 mathematical research language. The goal is to let users ask natural-language questions about M2 and get grounded answers with citations.
 
-The agent uses these tools:
-- `search_docs`: semantic search over structured Macaulay2 docs (or chunked text if `M2_INDEX_MODE=chunks`).
-- `summarize_docs`: condenses multiple search hits into a brief summary.
-- `search_wikipedia`: fallback for general background when the M2 docs have no hits (Wikipedia references include full URLs).
+![RAG query example](docs/figures/example-output1.png)
 
 ## Setup (with uv)
 
@@ -80,7 +77,9 @@ Set `OPENAI_API_KEY`, then run prompts using the commands in the `Makefile`.
 You can  run a one-off query using the Makefile target (defaults to `--index-mode chunks` and uses the `QUERY` variable):
 
 ```bash
-make rag-query QUERY="What is a hilbert polynomial?"
+make rag-query Q="What is a hilbert polynomial?"
+make rag-query Q="How can I get all monomials of degree 5 in Macaulay2?"
+make rag-query Q="Produce a minimal presentation of k[x, y, z]/ideal(x^2 - y^3, z^5)"
 ```
 
 This wraps `uv run python -m src.main ...` for convenience.
