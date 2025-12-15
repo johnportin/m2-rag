@@ -1012,6 +1012,15 @@ wheels = [
 ]
 
 [[package]]
+name = "jaxn"
+version = "0.0.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/37/ae/b2613f9b69e917be3c2c22eb71d3f7ed35f5b1a7de42ca6a468e1c197504/jaxn-0.0.1.tar.gz", hash = "sha256:9837e58f62de623701ad1a0f04336857a95aa3ada3a221070b32036d22ecda47", size = 62985, upload-time = "2025-10-31T08:24:30.741Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/06/4d/8f5a49638272af9bfdef2c9397591d75109f1400f6ac58c334d1a3c4a7ee/jaxn-0.0.1-py3-none-any.whl", hash = "sha256:6ea97c40a342714a16aa0a1646e5cb2b13ea14ad95a3c56e784d1cc6ab16ca81", size = 4740, upload-time = "2025-10-31T08:24:29.088Z" },
+]
+
+[[package]]
 name = "jeepney"
 version = "0.9.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1215,6 +1224,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "faiss-cpu" },
+    { name = "jaxn" },
     { name = "minsearch" },
     { name = "openai" },
     { name = "pydantic" },
@@ -1232,6 +1242,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "faiss-cpu", specifier = ">=1.7.4" },
+    { name = "jaxn", specifier = ">=0.0.1" },
     { name = "minsearch", specifier = ">=0.0.7" },
     { name = "openai", specifier = ">=2.8.1" },
     { name = "pydantic", specifier = ">=2.12.3" },

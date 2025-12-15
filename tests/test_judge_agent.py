@@ -35,7 +35,7 @@ def test_end_to_end_krull_dimension_judging(test_rag_agent, test_judge_agent):
         question=question,
         answer=rag_output.answer,
         references=rag_output.references,
-        tool_notes=["search_docs", "summarize_docs"],
+        tool_notes=["search_docs", "summarize_docs", "search_wikipedia"],
     )
 
     verdict = test_judge_agent.run_sync(judge_prompt).output

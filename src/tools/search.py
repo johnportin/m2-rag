@@ -1,15 +1,30 @@
 from __future__ import annotations
 
+import os
 from typing import List, Dict
 
 from pydantic import BaseModel
 
-from src.db.emb_index import create_index, EmbeddedDocIndex
+from src.db.chunk_index import ChunkEmbeddedIndex, ChunkMinsearchIndex, create_index as create_chunk_index
+from src.db.emb_index import EmbeddedDocIndex, create_index as create_doc_index
 from src.db.ms_index import MinsearchDocIndex
 
-SearchIndex = EmbeddedDocIndex | MinsearchDocIndex
+SearchIndex = EmbeddedDocIndex | MinsearchDocIndex | ChunkEmbeddedIndex | ChunkMinsearchIndex
 
-index: SearchIndex = create_index()
+
+def _build_index() -> SearchIndex:
+    """
+    Choose which index to load based on M2_INDEX_MODE.
+    - "chunks": use chunked raw doc index (data/m2_chunks.jsonl).
+    - default: structured doc index (data/m2_docs.jsonl).
+    """
+    mode = os.getenv("M2_INDEX_MODE", "docs").lower()
+    if mode in {"chunk", "chunks"}:
+        return create_chunk_index()
+    return create_doc_index()
+
+
+index: SearchIndex = _build_index()
 _last_search_results: List[Dict] = []
 
 

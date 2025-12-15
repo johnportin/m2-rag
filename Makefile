@@ -13,6 +13,9 @@ data:
 parser:
 	$(PY) src/scripts/run_parser.py
 
+chunk:
+	$(PY) src/scripts/chunk_docs.py
+
 test:
 	$(UV) run pytest
 
@@ -21,6 +24,9 @@ query-embed:
 
 query-ms:
 	$(PY) -m src.cli.query_ms_index "$(Q)" -k $(K)
+
+query-chunks:
+	M2_INDEX_MODE=chunks $(PY) -m src.cli.query_chunk_index "$(Q)" -k $(K)
 
 rag-query:
 	$(PY) -m src.cli.rag_query --query "$(Q)"
